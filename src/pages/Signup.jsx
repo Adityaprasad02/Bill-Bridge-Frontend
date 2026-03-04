@@ -6,7 +6,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2 } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { toast } from 'react-toastify';
-import signUpUser from "../features/auth/authService.js"
+import {signUpUser} from "../features/auth/authService.js"
+import { redirect } from "react-router-dom"
+import { u } from "framer-motion/client"
+import { useEffect } from "react"
+
+const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000" ; 
 
 export default function Signup() {
   const [role, setRole] = useState("CUSTOMER")
@@ -33,23 +38,18 @@ export default function Signup() {
 
     if (!form.username.trim()) {
       newErrors.username = "Username is required"
-      toast("Username is required", { type: "error" })
     }
 
     if (!form.email.trim()) {
       newErrors.email = "Email is required"
-      toast("Email is required", { type: "error" })
     } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       newErrors.email = "Enter a valid email"
-      toast("Enter a valid email", { type: "error" })
     }
 
     if (!form.password) {
       newErrors.password = "Password is required"
-      toast("Password is required", { type: "error" })
     } else if (form.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters"
-      toast("Password must be at least 6 characters", { type: "error" })
     }
 
     return newErrors
@@ -93,13 +93,24 @@ export default function Signup() {
 
     setIsGoogleLoading(true)
 
-    const payload = createPayload("GOOGLE")
-
-    setTimeout(() => {
-      console.log("Google Signup Payload:", payload)
-      setIsGoogleLoading(false)
-    }, 1500)
+    window.location.href = `${backendURL}/oauth2/authorization/google`
   }
+    useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+
+    const error = params.get("error")
+    const success = params.get("success")
+
+    if (error) {
+      toast.error(error) ; 
+      setIsGoogleLoading(false)
+    }
+
+    if (success) {
+      toast.success(success) ;
+      setIsGoogleLoading(false)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">

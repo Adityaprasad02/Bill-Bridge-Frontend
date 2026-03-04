@@ -1,10 +1,29 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Receipt } from "lucide-react";
+import useAuthStore from "@/features/auth/authStore";
+import { logoutUser } from "@/features/auth/authService";
+
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+const accessToken = useAuthStore((s) => s.accessToken);
+const clearSession = useAuthStore((s) => s.clearSession);
+console.log("Access token in Navbar:", accessToken);
+const handleLogout = async () => {
+  try {
+    await logoutUser();
+  } catch (err) {
+    console.error("Logout failed", err);
+  }
+  clearSession();
+};
 
+const isLoggedIn = !!accessToken;
+
+
+  const logoutBtnClass =
+    "px-4 py-2 rounded-md text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all duration-200";
   const linkClass = ({ isActive }) =>
     `px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
       isActive
@@ -31,12 +50,24 @@ export default function Navbar() {
           <NavLink to="/" className={linkClass}>
             Home
           </NavLink>
-          <NavLink to="/login" className={linkClass}>
-            Login
-          </NavLink>
-          <NavLink to="/signup" className={linkClass}>
-            Signup
-          </NavLink>
+
+          {!isLoggedIn ? (
+            <>
+              <NavLink to="/login" className={linkClass}>
+                Login
+              </NavLink>
+              <NavLink to="/signup" className={linkClass}>
+                Signup
+              </NavLink>
+            </>
+          ) : (
+            <>
+              <button type="button" onClick={handleLogout} className={logoutBtnClass}>
+                Logout
+              </button>
+              {/* TODO: Implement logout functionality later */}
+            </>
+          )}
         </nav>
 
         {/* Mobile Button */}
@@ -55,12 +86,28 @@ export default function Navbar() {
             <NavLink to="/" className={linkClass}>
               Home
             </NavLink>
-            <NavLink to="/login" className={linkClass}>
-              Login
-            </NavLink>
-            <NavLink to="/signup" className={linkClass}>
-              Signup
-            </NavLink>
+
+            {!isLoggedIn ? (
+              <>
+                <NavLink to="/login" className={linkClass}>
+                  Login
+                </NavLink>
+                <NavLink to="/signup" className={linkClass}>
+                  Signup
+                </NavLink>
+              </>
+            ) : (
+              <>
+                <button
+                type="button"
+                onClick={handleLogout}
+                className={logoutBtnClass}
+              >
+                Logout
+              </button>
+                {/* TODO: Implement logout functionality later */}
+              </>
+            )}
           </nav>
         </div>
       )}

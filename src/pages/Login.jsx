@@ -2,80 +2,90 @@ import { useState } from "react"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button.jsx"
 import { FcGoogle } from "react-icons/fc"
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { loginUser }  from "../features/auth/authService.js"
+import useAuthStore  from "../features/auth/authStore.js"
+import { getMe } from "@/features/auth/authService.js";
+
 
 export default function Login() {
+  const navigate = useNavigate();
+
+  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const setUser = useAuthStore((s) => s.setUser);
+  const setRefreshToken = useAuthStore((s) => s.setRefreshToken);
+
   const [form, setForm] = useState({
     username: "",
     password: "",
-  })
+  });
 
-  const [errors, setErrors] = useState({})
-  const [apiError, setApiError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // --------------------------
-  // Validation
-  // --------------------------
   const validate = () => {
-    const newErrors = {}
+    const newErrors = {};
+    if (!form.username.trim()) newErrors.username = "Username is required";
+    if (!form.password) newErrors.password = "Password is required";
+    return newErrors;
+  };
 
-    if (!form.username.trim()) {
-      newErrors.username = "Username is required"
-    }
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (loading) return;
 
-    if (!form.password) {
-      newErrors.password = "Password is required"
-    } else if (form.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
-    }
+  setApiError("");
+  const v = validate();
+  setErrors(v);
+  if (Object.keys(v).length) return;
 
-    return newErrors
-  }
+  setLoading(true);
 
-  // --------------------------
-  // Manual Login
-  // --------------------------
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setApiError("")
-
-    const validationErrors = validate()
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors)
-      return
-    }
-
-    setErrors({})
-    setLoading(true)
-
-    const payload = {
+  try {
+    // 1️⃣ Login
+    const loginData = await loginUser({
       username: form.username,
       password: form.password,
+    });
+
+    const accessToken = loginData?.accessToken;
+
+    if (!accessToken) {
+      throw new Error("Access token missing in login response");
     }
 
-    // Replace this with real API call later
-    setTimeout(() => {
-      console.log("Login Payload:", payload)
+    // 2️⃣ Store token
+    useAuthStore.getState().setAccessToken(accessToken);
 
-      // Fake failure example
-      setApiError("Invalid credentials. Please try again.")
-      setLoading(false)
-    }, 1500)
+    setAccessToken(loginData.accessToken);
+    setRefreshToken(loginData.refreshToken);
+
+    // 3️⃣ Fetch user
+    const user = await getMe();
+    setUser(user);
+    useAuthStore.getState().setUser(user);
+
+    // 4️⃣ Navigate
+    navigate("/dashboard", { replace: true });
+
+  } catch (err) {
+    setApiError(
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      "Login failed"
+    );
+  } finally {
+    setLoading(false);
   }
+};
 
-  // --------------------------
-  // Google Login
-  // --------------------------
   const handleGoogleLogin = () => {
-    setApiError("")
-    setLoading(true)
-
-    setTimeout(() => {
-      console.log("Google Login Triggered")
-      setLoading(false)
-    }, 1500)
-  }
+    window.location.href = "http://localhost:8000/oauth2/authorization/google";
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
