@@ -3,11 +3,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Receipt, ShieldCheck, BarChart3 } from "lucide-react"
 import { motion } from "framer-motion"
-import Footer from "./ui/Footer"
+import Footer from "@/components/layout/Footer.jsx"
+import { Link } from "react-router-dom"
 
 export default function Landing() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
 
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-3xl" />
@@ -81,9 +82,11 @@ export default function Landing() {
           Join Bill-Bridge today and take control of your invoices.
         </p>
         <div className="mt-6">
-          <Button size="lg" className="transition hover:scale-105">
+          <Link to="/signup">
+          <Button size="lg"  className="transition hover:scale-105">
             Create Account
           </Button>
+          </Link>
         </div>
       </section>
 

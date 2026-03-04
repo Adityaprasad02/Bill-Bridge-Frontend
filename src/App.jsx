@@ -1,9 +1,4 @@
-import { useState } from 'react'
-import './App.css'
-import React from 'react'
-import { Button } from "@/components/ui/Button.jsx"
-import {Input} from "@/components/ui/Input.jsx"
-import Landing from '@/components/Landing'
+import Landing from '@/pages/Landing.jsx'
 
 function App() {
   return (

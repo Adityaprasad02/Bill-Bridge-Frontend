@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/Button.jsx"
+import { Button } from "@/components/ui/button.jsx"
 import { FcGoogle } from "react-icons/fc"
 
 export default function Login() {
@@ -179,14 +179,14 @@ export default function Login() {
         {/* Google Button */}
         <Button
              type="button"
-                              variant="outline"
-                              className="w-full"
-                            //   onClick={handleGoogleSignup}
-                              >
-                              <FcGoogle className="mr-2 h-5 w-5" />
-                              Sign up with Google
+             variant="outline"
+              className="w-full"
+            onClick={handleGoogleLogin}
+                        >
+               <FcGoogle className="mr-2 h-5 w-5" />
+              Sign in with Google
         </Button>
-
+       
       </div>
     </div>
   )

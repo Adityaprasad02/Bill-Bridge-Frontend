@@ -122,3 +122,17 @@
     @apply bg-background text-foreground;
     }
 }
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+#root {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: initial !important;
+}

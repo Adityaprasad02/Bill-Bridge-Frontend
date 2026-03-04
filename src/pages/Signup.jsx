@@ -1,10 +1,12 @@
 import { useState } from "react"
-import { Button } from "@/components/ui/Button.jsx"
-import { Input } from "@/components/ui/Input.jsx"
+import { Button } from "@/components/ui/button.jsx"
+import { Input } from "@/components/ui/input.jsx"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2 } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
+import { toast } from 'react-toastify';
+import signUpUser from "../features/auth/authService.js"
 
 export default function Signup() {
   const [role, setRole] = useState("CUSTOMER")
@@ -16,6 +18,7 @@ export default function Signup() {
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  
 
   const createPayload = (provider = "LOCAL") => ({
     username: form.username,
@@ -30,24 +33,29 @@ export default function Signup() {
 
     if (!form.username.trim()) {
       newErrors.username = "Username is required"
+      toast("Username is required", { type: "error" })
     }
 
     if (!form.email.trim()) {
       newErrors.email = "Email is required"
+      toast("Email is required", { type: "error" })
     } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       newErrors.email = "Enter a valid email"
+      toast("Enter a valid email", { type: "error" })
     }
 
     if (!form.password) {
       newErrors.password = "Password is required"
+      toast("Password is required", { type: "error" })
     } else if (form.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters"
+      toast("Password must be at least 6 characters", { type: "error" })
     }
 
     return newErrors
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     const validationErrors = validate()
@@ -61,10 +69,23 @@ export default function Signup() {
 
     const payload = createPayload("LOCAL")
 
-    setTimeout(() => {
-      console.log("Signup Payload:", payload)
-      setIsSubmitting(false)
-    }, 1500)
+
+    try{
+        const data = await signUpUser(payload)
+        console.log("Signup Success:", data)
+        toast.success("Account created successfully! Please log in.")
+        setForm({ username: "", email: "", password: "" })
+    }catch(error){ 
+          
+        console.error("error received while signup : " , error)
+        const errorMessage =
+          error.response?.data?.error || "Signup failed ❌" ; 
+
+          toast.error(errorMessage)
+    }finally {
+     setIsSubmitting(false)
+    }
+
   }
 
   const handleGoogleSignup = () => {

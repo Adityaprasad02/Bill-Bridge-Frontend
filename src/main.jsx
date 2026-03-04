@@ -4,7 +4,7 @@ import App from './App.jsx'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "@/pages/Login.jsx"
 import Signup from "@/pages/Signup.jsx"
-import RootLayout from "@/pages/RootLayout.tsx"
+import RootLayout from "@/layouts/RootLayout.jsx"
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
