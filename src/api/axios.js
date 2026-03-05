@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { toast } from "react-toastify";
 import useAuthStore from "@/features/auth/authStore";
 
 const api = axios.create({
@@ -64,23 +64,60 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const res = await refreshClient.post("/refresh");
-      const newToken = res.data?.accessToken;
+  const refreshToken = useAuthStore.getState().refreshToken;
 
-      if (!newToken) throw new Error("No token from refresh");
+  if (!refreshToken) {
+    throw new Error("No refresh token available");
+  }
 
-      useAuthStore.getState().setAccessToken(newToken);
-      flushQueue(null, newToken);
-
-      originalRequest.headers.Authorization = `Bearer ${newToken}`;
-      return api(originalRequest);
-    } catch (err) {
-      flushQueue(err, null);
-      useAuthStore.getState().clearSession();
-      return Promise.reject(err);
-    } finally {
-      isRefreshing = false;
+  const res = await refreshClient.post(
+    "/refresh",
+    {},
+    {
+      headers: {
+        "X-REFRESH-TOKEN": refreshToken,
+      },
+      withCredentials: true,
     }
+  );
+
+  const newAccessToken = res.data?.accessToken;
+  const newRefreshToken = res.data?.refreshToken;
+
+  if (!newAccessToken || !newRefreshToken) {
+    throw new Error("Invalid refresh response");
+  }
+
+  // update zustand store
+  const store = useAuthStore.getState();
+  store.setAccessToken(newAccessToken);
+  store.setRefreshToken(newRefreshToken);
+
+  // success toast
+  toast.success("Session refreshed");
+
+  // resolve queued requests
+  flushQueue(null, newAccessToken);
+
+  // retry original request
+  originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+  return api(originalRequest);
+
+} catch (err) {
+
+  flushQueue(err, null);
+
+  // logout user if refresh fails
+  toast.error("Session expired. Please log in again.");
+  useAuthStore.getState().clearSession();
+  window.location.href = "/login";
+
+  return Promise.reject(err);
+
+} finally {
+  isRefreshing = false;
+}
   }
 );
 

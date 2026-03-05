@@ -1,5 +1,6 @@
 import api from "@/api/axios";
-import useAuthStore from "@/features/auth/authStore";
+import useAuthStore from "../../features/auth/authStore.js";
+
 
 export const signUpUser = async (data) => {
   const response = await api.post("/user/create", data);
