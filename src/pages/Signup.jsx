@@ -7,8 +7,7 @@ import { Loader2 } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { toast } from 'react-toastify';
 import {signUpUser} from "../features/auth/authService.js"
-import { redirect } from "react-router-dom"
-import { u } from "framer-motion/client"
+import { Link } from "react-router-dom"
 import { useEffect } from "react"
 
 const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000" ; 
@@ -209,6 +208,13 @@ export default function Signup() {
             )}
 
           </form>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link to="/login" className="text-primary hover:underline font-medium">
+              Sign in
+            </Link>
+          </p>
 
         </CardContent>
       </Card>

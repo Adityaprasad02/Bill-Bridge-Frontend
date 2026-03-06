@@ -39,7 +39,7 @@ export default function Dashboard() {
     isConnected,
   } = useSocket();
 
-  const role = user?.role?.replace("ROLE_", "");
+  const role = (me?.role || user?.role || "").replace("ROLE_", "");
 
   // ─── Load user profile ───
   useEffect(() => {
@@ -47,6 +47,8 @@ export default function Dashboard() {
     .then((response) => {
       console.log("✅ getMe response:", response);
       setMe(response);
+      // Keep store user in sync with fresh data
+      useAuthStore.getState().setUser(response);
     })
     .catch((error) => {
       console.error("❌ getMe error:", error);

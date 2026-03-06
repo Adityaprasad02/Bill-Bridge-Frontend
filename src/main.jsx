@@ -7,6 +7,7 @@ import Signup from "@/pages/Signup.jsx"
 import RootLayout from "@/layouts/RootLayout.jsx"
 import Dashboard from "@/pages/Dashboard.jsx"
 import RequireAuth from "./features/auth/RequireAuth.jsx"
+import OauthSuccess from './pages/OauthSuccess.jsx' ;
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
@@ -16,9 +17,10 @@ createRoot(document.getElementById('root')).render(
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route element={<RequireAuth />}>
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Route>
        </Route>  
+          <Route path="/oauth/success" element={<OauthSuccess />} />
     </Routes>
   </BrowserRouter>,
 )

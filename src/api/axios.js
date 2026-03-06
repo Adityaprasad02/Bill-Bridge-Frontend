@@ -21,9 +21,16 @@ const isPublicEndpoint = (url = "") =>
 // Attach Bearer token
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
+
   if (!isPublicEndpoint(config.url) && token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // fix for multipart uploads — let browser set Content-Type with boundary
+  if (config.data instanceof FormData) {
+    config.headers.set("Content-Type", false);
+  }
+
   return config;
 });
 
@@ -92,6 +99,7 @@ api.interceptors.response.use(
   const store = useAuthStore.getState();
   store.setAccessToken(newAccessToken);
   store.setRefreshToken(newRefreshToken);
+  if (res.data?.user) store.setUser(res.data.user);
 
   // success toast
   toast.success("Session refreshed");

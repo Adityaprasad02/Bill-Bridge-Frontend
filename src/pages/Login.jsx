@@ -3,10 +3,11 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button.jsx"
 import { FcGoogle } from "react-icons/fc"
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { loginUser }  from "../features/auth/authService.js"
 import useAuthStore  from "../features/auth/authStore.js"
-import { getMe } from "@/features/auth/authService.js";
+
+const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 
 export default function Login() {
@@ -57,16 +58,14 @@ export default function Login() {
       throw new Error("Access token missing in login response");
     }
 
-    // 2️⃣ Store token
-    useAuthStore.getState().setAccessToken(accessToken);
-
+    // 2️⃣ Store tokens
     setAccessToken(loginData.accessToken);
     setRefreshToken(loginData.refreshToken);
 
-    // 3️⃣ Fetch user
-    const user = await getMe();
-    setUser(user);
-    useAuthStore.getState().setUser(user);
+    // 3️⃣ Store user from TokenResponse (includes ResponseUserRegistration)
+    if (loginData.user) {
+      setUser(loginData.user);
+    }
 
     // 4️⃣ Navigate
     navigate("/dashboard", { replace: true });
@@ -84,7 +83,7 @@ export default function Login() {
 };
 
   const handleGoogleLogin = () => {
-   // window.location.href = "http://localhost:8000/oauth2/authorization/google";
+    window.location.href = `${backendURL}/oauth2/authorization/google`;
   };
 
   return (
@@ -196,6 +195,13 @@ export default function Login() {
                <FcGoogle className="mr-2 h-5 w-5" />
               Sign in with Google
         </Button>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-primary hover:underline font-medium">
+            Sign up
+          </Link>
+        </p>
        
       </div>
     </div>

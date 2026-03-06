@@ -25,10 +25,22 @@ export const fetchMerchantBills = async (merchantId) => {
 export const uploadBillPdf = async (billId, file) => {
   const form = new FormData();
   form.append("file", file);
-  const res = await api.post(`/merchant/upload/bill/${billId}`, form, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return res.data;
+
+  try {
+    const response = await api.post(
+      `/merchant/upload/bill/${billId}`,
+      form
+    );
+
+    return response.data;
+
+  } catch (error) {
+    console.error("Upload failed:", error);
+    console.error("Response status:", error.response?.status);
+    console.error("Response data:", error.response?.data);
+    console.error("Request headers:", error.config?.headers);
+    throw error;
+  }
 };
 
 export const viewBillAsMerchant = async (billId) => {
