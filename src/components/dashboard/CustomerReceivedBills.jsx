@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { initiatePayment, verifyPayment } from "@/api/billService";
 import { startPaytmCheckout } from "@/components/payments/PaytmPayment";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 /**
  * Shows bills received via WebSocket for the customer.
  * Pay button → initiate → Paytm checkout → verify → send response to merchant.
- * Matches the "Received Bills" card + handleCustomerPay + verifyPaymentTransaction flow.
  */
 export default function CustomerReceivedBills({
   notifications,
@@ -25,10 +27,8 @@ export default function CustomerReceivedBills({
     setPayingIndex(index);
 
     try {
-      // 1. Initiate payment with backend
       const initiateData = await initiatePayment(bill.billId);
 
-      // 2. Launch Paytm checkout overlay
       startPaytmCheckout(
         {
           orderId: initiateData.orderId,
@@ -36,14 +36,11 @@ export default function CustomerReceivedBills({
           amount: initiateData.amount,
         },
         async (paytmStatus) => {
-          // 3. Paytm returns STATUS, RESPMSG, ORDERID
           alert(`${paytmStatus.STATUS} – ${paytmStatus.RESPMSG}`);
 
           try {
-            // 4. Verify payment with backend
             const verifyData = await verifyPayment(paytmStatus.ORDERID);
 
-            // 5. Build paymentResponse matching backend PaymentResponse record
             const paymentResponse = {
               billId: bill.billId,
               customerId: bill.customerId,
@@ -57,7 +54,6 @@ export default function CustomerReceivedBills({
               amount: bill.amount,
             };
 
-            // 6. Send result to merchant via WebSocket
             const sent = sendPaymentResponse(
               paymentResponse,
               verifyData,
@@ -89,50 +85,66 @@ export default function CustomerReceivedBills({
   };
 
   return (
-    <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-4">
-      <h4 className="mb-3 text-sm font-semibold text-zinc-200">
-        💸 Received Bills
-      </h4>
-
-      {notifications.length === 0 ? (
-        <p className="text-center text-sm text-zinc-500 py-3">
-          No bills received yet
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {notifications.map((bill, i) => (
-            <div
-              key={`${bill.billId}-${i}`}
-              className="rounded border border-zinc-700 bg-zinc-800 p-3"
-            >
-              <div className="font-semibold text-white text-sm">
-                💸 Bill from {bill.merchantName}
-              </div>
-              <div className="text-xs text-zinc-400">
-                Bill ID: {bill.billId}
-              </div>
-              <div className="mt-1 text-sm text-zinc-300">
-                Amount: ₹{parseFloat(bill.amount).toFixed(2)}
-              </div>
-              <div className="text-sm text-zinc-300">Title: {bill.title}</div>
-              <div className="text-xs text-zinc-400">
-                Customer: {bill.customerName}
-              </div>
-              <div className="mt-2">
-                <button
-                  className="rounded bg-green-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
-                  disabled={payingIndex === i}
-                  onClick={() => handlePay(bill, i)}
-                >
-                  {payingIndex === i
-                    ? "Processing…"
-                    : `Pay ₹${parseFloat(bill.amount).toFixed(2)}`}
-                </button>
-              </div>
-            </div>
-          ))}
+    <Card className="border-zinc-800 bg-zinc-900/80 backdrop-blur">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+            Received Bills
+          </CardTitle>
+          {notifications.length > 0 && (
+            <Badge variant="outline" className="border-green-700/50 text-green-400">{notifications.length} pending</Badge>
+          )}
         </div>
-      )}
-    </div>
+        <CardDescription>Bills received from merchants awaiting payment</CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        {notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-zinc-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="mb-2 h-10 w-10 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+            <p className="text-sm">No bills received yet</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {notifications.map((bill, i) => (
+              <div
+                key={`${bill.billId}-${i}`}
+                className="rounded-lg border border-zinc-800 bg-zinc-800/50 p-4 transition-colors hover:bg-zinc-800/80"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-white">{bill.merchantName}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">Bill #{bill.billId} &middot; {bill.title}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">Customer: {bill.customerName}</p>
+                  </div>
+                  <p className="text-xl font-bold text-green-400">&#8377;{parseFloat(bill.amount).toFixed(2)}</p>
+                </div>
+
+                <div className="mt-3">
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    disabled={payingIndex === i}
+                    onClick={() => handlePay(bill, i)}
+                  >
+                    {payingIndex === i ? (
+                      <span className="flex items-center gap-2">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        Processing...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+                        Pay &#8377;{parseFloat(bill.amount).toFixed(2)}
+                      </span>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchMerchantBills, viewBillAsMerchant, deleteBill, fetchPaymentDetails, initiateRefund, getRefundStatus } from "@/api/billService";
-import { getStatusBadgeClasses } from "./statusUtils";
 import { toast } from "react-toastify";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
@@ -219,284 +221,351 @@ export default function MerchantBillsList({ merchantId, merchantData, merchantUs
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-4">
-        <h4 className="mb-2 text-sm font-semibold text-zinc-200">📚 All Bills</h4>
-        <p className="text-center text-sm text-zinc-500 py-3">Loading…</p>
-      </div>
+      <Card className="border-zinc-800 bg-zinc-900/80 backdrop-blur">
+        <CardHeader>
+          <CardTitle className="text-white">All Bills</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <span className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-600 border-t-blue-400" />
+            <span className="ml-3 text-sm text-zinc-400">Loading bills...</span>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-lg border border-zinc-700 bg-zinc-900 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-zinc-200">📚 All Bills</h4>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-400">Rows:</span>
-          <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
-            <SelectTrigger className="h-7 w-[70px] bg-zinc-800 border-zinc-600 text-zinc-200 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-600">
-              {PAGE_SIZE_OPTIONS.map((size) => (
-                <SelectItem key={size} value={String(size)} className="text-zinc-200 text-xs">
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {totalElements > 0 && (
-            <span className="text-xs text-zinc-500">({totalElements} total)</span>
-          )}
+    <Card className="border-zinc-800 bg-zinc-900/80 backdrop-blur">
+      <CardHeader className="pb-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" /></svg>
+              All Bills
+            </CardTitle>
+            <CardDescription className="mt-1">{totalElements} bill{totalElements !== 1 ? "s" : ""} total</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-400">Rows per page:</span>
+            <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+              <SelectTrigger className="h-8 w-18 border-zinc-700 bg-zinc-800/50 text-xs text-zinc-200">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-zinc-700 bg-zinc-800">
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <SelectItem key={size} value={String(size)} className="text-xs text-zinc-200">
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
+      </CardHeader>
+      <CardContent>
+        {bills.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-zinc-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="mb-2 h-10 w-10 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            <p className="text-sm">No bills found</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {bills.map((bill) => {
+              const canResend = bill.billStatus !== "PAID";
+              const isPaid = bill.billStatus === "PAID";
+              const hasPayload = !!billPayloadCache?.[bill.billId];
+              const pd = paymentDetailsMap[bill.billId];
+              const rd = refundDetailsMap[bill.billId];
 
-      {bills.length === 0 ? (
-        <p className="text-center text-sm text-zinc-500 py-3">No bills found</p>
-      ) : (
-        <div className="space-y-2">
-          {bills.map((bill) => {
-            const canResend = bill.billStatus !== "PAID";
-            const isPaid = bill.billStatus === "PAID";
-            const hasPayload = !!billPayloadCache?.[bill.billId];
-            const pd = paymentDetailsMap[bill.billId];
-            const rd = refundDetailsMap[bill.billId];
+              const statusColor = isPaid ? "border-green-700/50 text-green-400"
+                : bill.billStatus === "PENDING" ? "border-yellow-700/50 text-yellow-400"
+                : bill.billStatus === "FAILED" || bill.billStatus === "DECLINED" ? "border-red-700/50 text-red-400"
+                : "border-zinc-700 text-zinc-400";
 
-            return (
-              <div
-                key={bill.billId}
-                className="rounded border border-zinc-700 bg-zinc-800 p-3"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-semibold text-white text-sm">
-                      {bill.billTitle}
+              return (
+                <div
+                  key={bill.billId}
+                  className="rounded-lg border border-zinc-800 bg-zinc-800/50 p-4 transition-colors hover:bg-zinc-800/80"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-white">{bill.billTitle}</p>
+                      <p className="mt-0.5 text-xs text-zinc-500">Bill #{bill.billId} &middot; {bill.paymentMode}</p>
                     </div>
-                    <div className="text-xs text-zinc-400">
-                      Bill ID: {bill.billId}
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-white">&#8377;{parseFloat(bill.billAmount).toFixed(2)}</p>
+                      <Badge variant="outline" className={`mt-1 gap-1 text-[10px] ${statusColor}`}>
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        {bill.billStatus}
+                      </Badge>
                     </div>
                   </div>
-                  <span
-                    className={`rounded px-2 py-0.5 text-xs font-medium border ${getStatusBadgeClasses(bill.billStatus)}`}
-                  >
-                    {bill.billStatus}
-                  </span>
-                </div>
-                <div className="mt-1 text-sm text-zinc-300">
-                  Amount: ₹{parseFloat(bill.billAmount).toFixed(2)}
-                </div>
-                <div className="text-xs text-zinc-400">
-                  Mode: {bill.paymentMode}
-                </div>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {/* Resend */}
-                  <button
-                    className={`rounded px-3 py-1 text-xs font-medium ${
-                      canResend && hasPayload
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : canResend
-                        ? "bg-blue-600/50 text-white/70 hover:bg-blue-700"
-                        : "bg-zinc-700 text-zinc-500 cursor-not-allowed"
-                    }`}
-                    disabled={!canResend}
-                    onClick={() => handleResend(bill)}
-                  >
-                    {canResend ? "Resend" : "Paid"}
-                  </button>
-                  {/* View Bill */}
-                  <button
-                    className="rounded bg-cyan-700 px-3 py-1 text-xs font-medium text-white hover:bg-cyan-800"
-                    onClick={() => handleViewBill(bill.billId)}
-                  >
-                    View Bill
-                  </button>
-                  {/* Payment Details (only for PAID) */}
-                  {isPaid && (
-                    <button
-                      className="rounded bg-violet-700 px-3 py-1 text-xs font-medium text-white hover:bg-violet-800 disabled:opacity-50"
-                      disabled={paymentLoading[bill.billId]}
-                      onClick={() => handleTogglePaymentDetails(bill.billId)}
+
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {/* Resend */}
+                    <Button
+                      size="sm"
+                      variant={canResend ? "default" : "secondary"}
+                      className={canResend ? "bg-blue-600 hover:bg-blue-700" : "cursor-not-allowed opacity-50"}
+                      disabled={!canResend}
+                      onClick={() => handleResend(bill)}
                     >
-                      {paymentLoading[bill.billId] ? "Loading…" : pd ? "Hide Details" : "Payment Details"}
-                    </button>
-                  )}
-                  {/* Refund (only for PAID) */}
-                  {isPaid && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <button
-                          className="rounded bg-orange-600 px-3 py-1 text-xs font-medium text-white hover:bg-orange-700 disabled:opacity-50"
-                          disabled={refundLoading[bill.billId]}
-                        >
-                          {refundLoading[bill.billId] ? "Processing…" : "Refund"}
-                        </button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to initiate a refund of{" "}
-                            <span className="font-semibold text-white">₹{parseFloat(bill.billAmount).toFixed(2)}</span>{" "}
-                            for bill <span className="font-mono text-white">#{bill.billId}</span>?
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="border-zinc-600 text-zinc-300 hover:bg-zinc-800 hover:text-white">
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-orange-600 text-white hover:bg-orange-700"
-                            onClick={() => handleRefund(bill)}
+                      {canResend ? "Resend" : "Paid"}
+                    </Button>
+                    {/* View Bill */}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-zinc-700 text-zinc-200 hover:bg-zinc-800 hover:text-white"
+                      onClick={() => handleViewBill(bill.billId)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="mr-1.5 h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
+                      View
+                    </Button>
+                    {/* Payment Details */}
+                    {isPaid && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-violet-700/50 text-violet-300 hover:bg-violet-900/30 hover:text-violet-200"
+                        disabled={paymentLoading[bill.billId]}
+                        onClick={() => handleTogglePaymentDetails(bill.billId)}
+                      >
+                        {paymentLoading[bill.billId] ? (
+                          <span className="flex items-center gap-1.5">
+                            <span className="h-3 w-3 animate-spin rounded-full border border-violet-400/30 border-t-violet-400" />
+                            Loading
+                          </span>
+                        ) : pd ? "Hide Details" : "Payment Details"}
+                      </Button>
+                    )}
+                    {/* Refund */}
+                    {isPaid && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                            disabled={refundLoading[bill.billId]}
                           >
-                            Yes, Initiate Refund
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            {refundLoading[bill.billId] ? (
+                              <span className="flex items-center gap-1.5">
+                                <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
+                                Processing
+                              </span>
+                            ) : "Refund"}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to initiate a refund of{" "}
+                              <span className="font-semibold text-white">&#8377;{parseFloat(bill.billAmount).toFixed(2)}</span>{" "}
+                              for bill <span className="font-mono text-white">#{bill.billId}</span>?
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="border-zinc-600 text-zinc-300 hover:bg-zinc-800 hover:text-white">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-orange-600 text-white hover:bg-orange-700"
+                              onClick={() => handleRefund(bill)}
+                            >
+                              Yes, Initiate Refund
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                    {/* Refund Status */}
+                    {isPaid && rd && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-amber-700/50 text-amber-300 hover:bg-amber-900/30 hover:text-amber-200"
+                        disabled={refundStatusLoading[bill.billId]}
+                        onClick={() => handleRefundStatus(bill.billId)}
+                      >
+                        {refundStatusLoading[bill.billId] ? "Checking..." : "Refund Status"}
+                      </Button>
+                    )}
+                    {/* Delete */}
+                    {canResend && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-red-700/50 text-red-400 hover:bg-red-900/30 hover:text-red-300"
+                        onClick={() => handleDeleteBill(bill.billId)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="mr-1.5 h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                        Delete
+                      </Button>
+                    )}
+                    {!hasPayload && canResend && (
+                      <span className="text-xs text-zinc-500 italic">
+                        Send from this session to enable resend
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Payment Details Panel */}
+                  {pd && (
+                    <div className="mt-3 rounded-lg border border-violet-800/30 bg-violet-950/20 p-4">
+                      <h5 className="mb-3 flex items-center gap-2 text-sm font-semibold text-violet-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+                        Payment Details
+                      </h5>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {[
+                          ["Txn ID", pd.txnId || pd.TxnId],
+                          ["Order ID", pd.orderId],
+                          ["Bank Txn ID", pd.bankTxnId],
+                          ["Amount", `₹${parseFloat(pd.txnAmount).toFixed(2)}`],
+                          ["Txn Type", pd.txnType],
+                          ["Gateway", pd.gatewayName],
+                          ["Bank", pd.bankName],
+                          ["Date", pd.txnDate],
+                        ].map(([label, value]) => (
+                          <div key={label} className="rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2">
+                            <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">{label}</p>
+                            <p className="mt-0.5 text-sm font-medium text-zinc-200">{value || "—"}</p>
+                          </div>
+                        ))}
+                        <div className="rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Status</p>
+                          <Badge variant="outline" className={`mt-1 gap-1 text-[10px] ${pd.resultStatus === "TXN_SUCCESS" ? "border-green-700/50 text-green-400" : "border-red-700/50 text-red-400"}`}>
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            {pd.resultStatus}
+                          </Badge>
+                        </div>
+                        {pd.refundAmt != null && (
+                          <div className="rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2">
+                            <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Refund Amt</p>
+                            <p className="mt-0.5 text-sm font-medium text-zinc-200">&#8377;{parseFloat(pd.refundAmt).toFixed(2)}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
-                  {/* Refund Status (only when refund details exist) */}
-                  {isPaid && rd && (
-                    <button
-                      className="rounded bg-amber-600 px-3 py-1 text-xs font-medium text-white hover:bg-amber-700 disabled:opacity-50"
-                      disabled={refundStatusLoading[bill.billId]}
-                      onClick={() => handleRefundStatus(bill.billId)}
-                    >
-                      {refundStatusLoading[bill.billId] ? "Checking…" : "Refund Status"}
-                    </button>
-                  )}
-                  {/* Delete (only non-PAID) */}
-                  {canResend && (
-                    <button
-                      className="rounded bg-red-700 px-3 py-1 text-xs font-medium text-white hover:bg-red-800"
-                      onClick={() => handleDeleteBill(bill.billId)}
-                    >
-                      Delete
-                    </button>
-                  )}
-                  {!hasPayload && canResend && (
-                    <span className="text-xs text-zinc-500">
-                      Send from this session to enable resend
-                    </span>
+
+                  {/* Refund Details Panel */}
+                  {rd && (
+                    <div className="mt-2 rounded-lg border border-orange-800/30 bg-orange-950/20 p-4">
+                      <h5 className="mb-3 flex items-center gap-2 text-sm font-semibold text-orange-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" /></svg>
+                        Refund Details
+                      </h5>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {[
+                          ["Refund ID", rd.refundId || "—"],
+                          ["Ref ID", rd.refId || "—"],
+                          ["Order ID", rd.orderId || "—"],
+                          ["Amount", `₹${parseFloat(rd.refundAmount || rd.totalRefundAmount || 0).toFixed(2)}`],
+                        ].map(([label, value]) => (
+                          <div key={label} className="rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2">
+                            <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">{label}</p>
+                            <p className="mt-0.5 text-sm font-medium text-zinc-200">{value}</p>
+                          </div>
+                        ))}
+                        <div className="rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Status</p>
+                          <Badge variant="outline" className={`mt-1 gap-1 text-[10px] ${
+                            rd.resultStatus === "TXN_SUCCESS" ? "border-green-700/50 text-green-400" :
+                            rd.resultStatus === "PENDING" ? "border-yellow-700/50 text-yellow-400" : "border-red-700/50 text-red-400"
+                          }`}>
+                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                            {rd.resultStatus || rd.resultInfo?.resultStatus || "—"}
+                          </Badge>
+                        </div>
+                        {rd.resultMsg && (
+                          <div className="rounded-md border border-zinc-800 bg-zinc-900/60 px-3 py-2">
+                            <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Message</p>
+                            <p className="mt-0.5 text-sm text-zinc-200">{rd.resultMsg}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                {/* Payment Details Panel */}
-                {pd && (
-                  <div className="mt-3 rounded border border-zinc-600 bg-zinc-900 p-3 text-xs">
-                    <h5 className="font-semibold text-violet-300 mb-2">Payment Details</h5>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-zinc-300">
-                      <span className="text-zinc-500">Txn ID:</span><span>{pd.txnId || pd.TxnId}</span>
-                      <span className="text-zinc-500">Order ID:</span><span>{pd.orderId}</span>
-                      <span className="text-zinc-500">Bank Txn ID:</span><span>{pd.bankTxnId}</span>
-                      <span className="text-zinc-500">Amount:</span><span>₹{parseFloat(pd.txnAmount).toFixed(2)}</span>
-                      <span className="text-zinc-500">Txn Type:</span><span>{pd.txnType}</span>
-                      <span className="text-zinc-500">Gateway:</span><span>{pd.gatewayName}</span>
-                      <span className="text-zinc-500">Bank:</span><span>{pd.bankName}</span>
-                      <span className="text-zinc-500">Status:</span>
-                      <span className={pd.resultStatus === "TXN_SUCCESS" ? "text-green-400" : "text-red-400"}>{pd.resultStatus}</span>
-                      <span className="text-zinc-500">Date:</span><span>{pd.txnDate}</span>
-                      {pd.refundAmt != null && (
-                        <><span className="text-zinc-500">Refund Amt:</span><span>₹{parseFloat(pd.refundAmt).toFixed(2)}</span></>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Refund Details Panel */}
-                {rd && (
-                  <div className="mt-2 rounded border border-zinc-600 bg-zinc-900 p-3 text-xs">
-                    <h5 className="font-semibold text-orange-300 mb-2">Refund Details</h5>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-zinc-300">
-                      <span className="text-zinc-500">Refund ID:</span><span>{rd.refundId || "—"}</span>
-                      <span className="text-zinc-500">Ref ID:</span><span>{rd.refId || "—"}</span>
-                      <span className="text-zinc-500">Order ID:</span><span>{rd.orderId || "—"}</span>
-                      <span className="text-zinc-500">Amount:</span><span>₹{parseFloat(rd.refundAmount || rd.totalRefundAmount || 0).toFixed(2)}</span>
-                      <span className="text-zinc-500">Status:</span>
-                      <span className={
-                        rd.resultStatus === "TXN_SUCCESS" ? "text-green-400" :
-                        rd.resultStatus === "PENDING" ? "text-yellow-400" : "text-red-400"
-                      }>{rd.resultStatus || rd.resultInfo?.resultStatus || "—"}</span>
-                      {rd.resultMsg && (
-                        <><span className="text-zinc-500">Message:</span><span>{rd.resultMsg}</span></>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {totalPages > 1 && (
-        <div className="mt-4 flex flex-col items-center gap-2">
-          <span className="text-xs text-zinc-400">
-            Page {currentPage + 1} of {totalPages}
-          </span>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
-                  className={currentPage === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-
-              {getPageNumbers()[0] > 0 && (
-                <>
-                  <PaginationItem>
-                    <PaginationLink href="#" onClick={(e) => { e.preventDefault(); handlePageChange(0); }} className="cursor-pointer text-zinc-200">
-                      1
-                    </PaginationLink>
-                  </PaginationItem>
-                  {getPageNumbers()[0] > 1 && (
-                    <PaginationItem>
-                      <PaginationEllipsis className="text-zinc-400" />
-                    </PaginationItem>
-                  )}
-                </>
-              )}
-
-              {getPageNumbers().map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
+        {totalPages > 1 && (
+          <div className="mt-4 flex flex-col items-center gap-2 border-t border-zinc-800 pt-4">
+            <span className="text-xs text-zinc-400">
+              Page {currentPage + 1} of {totalPages}
+            </span>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
                     href="#"
-                    isActive={page === currentPage}
-                    onClick={(e) => { e.preventDefault(); handlePageChange(page); }}
-                    className="cursor-pointer text-zinc-200"
-                  >
-                    {page + 1}
-                  </PaginationLink>
+                    onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
+                    className={currentPage === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
                 </PaginationItem>
-              ))}
 
-              {getPageNumbers().length > 0 && getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
-                <>
-                  {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 2 && (
+                {getPageNumbers()[0] > 0 && (
+                  <>
                     <PaginationItem>
-                      <PaginationEllipsis className="text-zinc-400" />
+                      <PaginationLink href="#" onClick={(e) => { e.preventDefault(); handlePageChange(0); }} className="cursor-pointer text-zinc-200">
+                        1
+                      </PaginationLink>
                     </PaginationItem>
-                  )}
-                  <PaginationItem>
-                    <PaginationLink href="#" onClick={(e) => { e.preventDefault(); handlePageChange(totalPages - 1); }} className="cursor-pointer text-zinc-200">
-                      {totalPages}
+                    {getPageNumbers()[0] > 1 && (
+                      <PaginationItem>
+                        <PaginationEllipsis className="text-zinc-400" />
+                      </PaginationItem>
+                    )}
+                  </>
+                )}
+
+                {getPageNumbers().map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      href="#"
+                      isActive={page === currentPage}
+                      onClick={(e) => { e.preventDefault(); handlePageChange(page); }}
+                      className="cursor-pointer text-zinc-200"
+                    >
+                      {page + 1}
                     </PaginationLink>
                   </PaginationItem>
-                </>
-              )}
+                ))}
 
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-                  className={currentPage >= totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
-    </div>
+                {getPageNumbers().length > 0 && getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                  <>
+                    {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 2 && (
+                      <PaginationItem>
+                        <PaginationEllipsis className="text-zinc-400" />
+                      </PaginationItem>
+                    )}
+                    <PaginationItem>
+                      <PaginationLink href="#" onClick={(e) => { e.preventDefault(); handlePageChange(totalPages - 1); }} className="cursor-pointer text-zinc-200">
+                        {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  </>
+                )}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
+                    className={currentPage >= totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
