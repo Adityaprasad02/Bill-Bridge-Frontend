@@ -186,14 +186,46 @@ if (!me) {
           {/* Already registered → show details + bill sections */}
           {!merchantLoading && merchantData && (
             <>
-              <div className="mb-4 rounded-lg border border-green-700/40 bg-green-900/20 p-4">
-                <p className="text-green-300 text-sm font-medium mb-2">
-                  You are already registered as a Merchant ✓
-                </p>
-                <h4 className="text-white font-semibold mb-1">Merchant Details</h4>
-                <pre className="text-xs text-zinc-400 overflow-auto max-h-40">
-                  {JSON.stringify(merchantData, null, 2)}
-                </pre>
+              <div className="mb-4 rounded-lg border border-green-700/40 bg-gradient-to-br from-green-900/30 to-zinc-900 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20 text-green-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                  </span>
+                  <div>
+                    <p className="text-green-400 text-sm font-semibold">Verified Merchant</p>
+                    <p className="text-zinc-500 text-xs">Your merchant account is active</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="rounded-md bg-zinc-800/60 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-0.5">Business Name</p>
+                    <p className="text-sm font-medium text-white">{merchantData.businessName}</p>
+                  </div>
+                  <div className="rounded-md bg-zinc-800/60 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-0.5">Type</p>
+                    <p className="text-sm font-medium text-white">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                        merchantData.type === "ONLINE"
+                          ? "bg-blue-500/20 text-blue-300"
+                          : "bg-amber-500/20 text-amber-300"
+                      }`}>
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        {merchantData.type}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="rounded-md bg-zinc-800/60 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-0.5">Address</p>
+                    <p className="text-sm font-medium text-white">{merchantData.address}</p>
+                  </div>
+                  <div className="rounded-md bg-zinc-800/60 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-0.5">GST Number</p>
+                    <p className="text-sm font-mono font-medium text-white">{merchantData.gstNumber}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-[11px] text-zinc-600">
+                  <span className="font-mono">{merchantData.merchantId}</span>
+                </div>
               </div>
 
               {/* Bill Management */}

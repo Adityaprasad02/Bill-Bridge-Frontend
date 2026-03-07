@@ -179,11 +179,57 @@ export default function CreateBillForm({ onBillCreated }) {
         </div>
       )}
       {result && (
-        <div className="mt-3 rounded bg-green-900/40 px-3 py-2 text-sm text-green-300">
-          Bill Generated Successfully!
-          <pre className="mt-1 text-xs text-zinc-400 overflow-auto max-h-48">
-            {JSON.stringify(result, null, 2)}
-          </pre>
+        <div className="mt-4 rounded-lg border border-green-700/40 bg-gradient-to-br from-green-900/30 to-zinc-900 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green-500/20 text-green-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+            </span>
+            <p className="text-green-400 text-sm font-semibold">Bill Generated Successfully!</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="col-span-2 rounded-md bg-zinc-800/60 px-3 py-2 flex items-center justify-between">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-zinc-500">Bill Title</p>
+                <p className="font-medium text-white">{result.title}</p>
+              </div>
+              <span className="text-lg font-semibold text-green-400">₹{parseFloat(result.amount).toFixed(2)}</span>
+            </div>
+            <div className="rounded-md bg-zinc-800/60 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-0.5">Bill ID</p>
+              <p className="font-mono font-medium text-white">{result.billId}</p>
+            </div>
+            <div className="rounded-md bg-zinc-800/60 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-0.5">Status</p>
+              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                result.status === "PAID" ? "bg-green-500/20 text-green-300" : "bg-yellow-500/20 text-yellow-300"
+              }`}>
+                <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                {result.status}
+              </span>
+            </div>
+            <div className="rounded-md bg-zinc-800/60 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-0.5">Payment Mode</p>
+              <p className="font-medium text-white">{result.mode}</p>
+            </div>
+            <div className="rounded-md bg-zinc-800/60 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-0.5">Location</p>
+              <p className="font-medium text-white">{result.billLocation || "—"}</p>
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="rounded-md border border-zinc-700/50 bg-zinc-800/40 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-wider text-blue-400 mb-1">Merchant</p>
+              <p className="text-sm font-medium text-white">{result.billMerchantDetails?.merchantName}</p>
+              <p className="text-xs text-zinc-500">@{result.billMerchantDetails?.merchantUserName}</p>
+            </div>
+            <div className="rounded-md border border-zinc-700/50 bg-zinc-800/40 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-wider text-purple-400 mb-1">Customer</p>
+              <p className="text-sm font-medium text-white">{result.billCustomerDetails?.customerName}</p>
+              <p className="text-xs text-zinc-500">ID: {result.billCustomerDetails?.customerId}</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -81,3 +81,29 @@ export const verifyPayment = async (orderId) => {
   const res = await api.post(`/verify/payment/${orderId}`);
   return res.data;
 };
+
+// ─── Payment Details ───
+
+export const fetchPaymentDetails = async (billId) => {
+  const res = await api.get(`/user/fetch/paymentDetails/${billId}`);
+  return res.data;
+};
+
+// ─── Delete Bill (Merchant only) ───
+
+export const deleteBill = async (billId) => {
+  const res = await api.delete(`/merchant/delete/bill/${billId}`);
+  return res.data;
+};
+
+// ─── Refund ───
+
+export const initiateRefund = async (id, refundAmount) => {
+  const res = await api.post(`/paytm/refund`, { id, refundAmount });
+  return res.data;
+};
+
+export const getRefundStatus = async (orderId, refId) => {
+  const res = await api.get(`/status/refund/${orderId}/${refId}`);
+  return res.data;
+};
