@@ -28,7 +28,7 @@ api.interceptors.request.use((config) => {
 
   // fix for multipart uploads — let browser set Content-Type with boundary
   if (config.data instanceof FormData) {
-    config.headers.set("Content-Type", false);
+    delete config.headers["Content-Type"];
   }
 
   return config;
@@ -50,13 +50,12 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
 
-    // Treat both 401 and 403 (with auth-related messages) as token errors
+    // Treat 401, 403, or 500 wrapping auth errors as token failures
+    const responseText = JSON.stringify(error.response?.data ?? "");
+    const hasAuthMessage = /invalid.*jws|expired|jwt|token/i.test(responseText);
     const isAuthError =
       status === 401 ||
-      (status === 403 &&
-        /invalid.*jws|expired|jwt|token/i.test(
-          JSON.stringify(error.response?.data ?? "")
-        ));
+      ((status === 403 || status === 500) && hasAuthMessage);
 
     if (
       !isAuthError ||
