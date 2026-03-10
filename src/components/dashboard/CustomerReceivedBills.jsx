@@ -69,7 +69,7 @@ export default function CustomerReceivedBills({
               alert("WebSocket not connected. Refresh the page.");
             }
           } catch (err) {
-            console.error("Payment verification error:", err);
+            //console.error("Payment verification error:", err);
             alert("Payment verification failed: " + (err.message || err));
           } finally {
             setPayingIndex(null);
@@ -77,8 +77,8 @@ export default function CustomerReceivedBills({
         }
       );
     } catch (err) {
-      console.error("Payment initiation error:", err);
-      console.error("Response data:", err.response?.data);
+      //console.error("Payment initiation error:", err);
+      //console.error("Response data:", err.response?.data);
       alert("Payment initiation failed: " + (err.response?.data?.error || err.message || err));
       setPayingIndex(null);
     }

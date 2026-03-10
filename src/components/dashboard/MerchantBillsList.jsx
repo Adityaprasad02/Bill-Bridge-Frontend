@@ -62,7 +62,7 @@ export default function MerchantBillsList({ merchantId, merchantData, merchantUs
         setAllBills([]);
       }
     } catch (err) {
-      console.error("Failed to refresh merchant bills:", err);
+      //console.error("Failed to refresh merchant bills:", err);
     } finally {
       setLoading(false);
     }

@@ -9,12 +9,12 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 const accessToken = useAuthStore((s) => s.accessToken);
 const clearSession = useAuthStore((s) => s.clearSession);
-console.log("Access token in Navbar:", accessToken);
+//console.log("Access token in Navbar:", accessToken);
 const handleLogout = async () => {
   try {
     await logoutUser();
   } catch (err) {
-    console.error("Logout failed", err);
+    //console.error("Logout failed", err);
   }
   clearSession();
 };

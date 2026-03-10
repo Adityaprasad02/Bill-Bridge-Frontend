@@ -51,7 +51,7 @@ export default function CreateBillForm({ onBillCreated }) {
 
       setResult(billData);
 
-      console.log("createBill response:", JSON.stringify(billData, null, 2));
+     // console.log("createBill response:", JSON.stringify(billData, null, 2));
 
       // Build the SendBillNotification payload matching backend DTO
       const sendPayload = {
