@@ -48,9 +48,18 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
+
+    // Treat both 401 and 403 (with auth-related messages) as token errors
+    const isAuthError =
+      status === 401 ||
+      (status === 403 &&
+        /invalid.*jws|expired|jwt|token/i.test(
+          JSON.stringify(error.response?.data ?? "")
+        ));
 
     if (
-      error.response?.status !== 401 ||
+      !isAuthError ||
       originalRequest._retry ||
       isPublicEndpoint(originalRequest.url)
     ) {
