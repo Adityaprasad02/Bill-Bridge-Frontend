@@ -7,6 +7,8 @@ import Footer from "@/components/layout/Footer.jsx"
 import { Link } from "react-router-dom"
 
 export default function Landing() {
+      console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
+
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
 
