@@ -7,7 +7,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { loginUser }  from "../features/auth/authService.js"
 import useAuthStore  from "../features/auth/authStore.js"
 
-const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+const backendURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 
 export default function Login() {

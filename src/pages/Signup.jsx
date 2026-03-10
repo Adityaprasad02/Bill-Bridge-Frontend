@@ -10,7 +10,7 @@ import {signUpUser} from "../features/auth/authService.js"
 import { Link } from "react-router-dom"
 import { useEffect } from "react"
 
-const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000" ; 
+const backendURL = import.meta.env.VITE_API_BASE_URL  || "http://localhost:8000" ; 
 
 export default function Signup() {
   const [role, setRole] = useState("CUSTOMER")
