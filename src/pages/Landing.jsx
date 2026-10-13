@@ -5,21 +5,21 @@ import Footer from "@/components/layout/Footer.jsx"
 
 /* ------------------------------------------------------------------
    Assets live in /public:
-     /paytm-logo.png
-     /screenshots/*.webp
+      /paytm-logo.png
+      /screenshots/*.webp
    ------------------------------------------------------------------ */
 const S = (name) => `/screenshots/${name}.webp`
 
 const FONT_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
-.bb-display { font-family: 'Sora', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.03em; }
-.bb-body { font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif; }
-@keyframes bb-fade { from { opacity: 0; transform: scale(.992); } to { opacity: 1; transform: none; } }
-.bb-fade { animation: bb-fade .35s ease both; }
-@keyframes bb-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-.bb-rise { animation: bb-rise .8s cubic-bezier(.2,.7,.2,1) both; }
-.bb-rise-2 { animation-delay: .12s; }
-.bb-rise-3 { animation-delay: .24s; }
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+.bb-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.035em; }
+.bb-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+@keyframes bb-fade { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
+.bb-fade { animation: bb-fade .4s cubic-bezier(.16,1,.3,1) both; }
+@keyframes bb-rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+.bb-rise { animation: bb-rise .85s cubic-bezier(.16,1,.3,1) both; }
+.bb-rise-2 { animation-delay: .1s; }
+.bb-rise-3 { animation-delay: .2s; }
 .bb-scroll::-webkit-scrollbar { display: none; }
 @media (prefers-reduced-motion: reduce) { .bb-fade, .bb-rise { animation: none; } }
 `
@@ -112,11 +112,11 @@ function PaytmLogo({ className = "h-6" }) {
   return <img src="/paytm-logo.png" alt="Paytm" className={className} onError={() => setFailed(true)} />
 }
 
-function Screen({ src, alt, fit = "object-contain" }) {
+function Screen({ src, alt, fit = "object-cover" }) {
   const [failed, setFailed] = useState(false)
   if (failed) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-[#07101c] p-4 text-center text-xs text-white/40">
+      <div className="flex h-full w-full items-center justify-center bg-[#090d16] p-4 text-center text-xs text-white/30">
         Missing image: {src}
       </div>
     )
@@ -135,15 +135,28 @@ function Screen({ src, alt, fit = "object-contain" }) {
 
 function Laptop({ src, alt, className = "" }) {
   return (
-    <div className={className}>
-      <div className="rounded-t-[1.1rem] border border-white/15 bg-[#0b1220] p-[2%] pb-0 shadow-[0_50px_90px_-35px_rgba(0,0,0,0.95)]">
-        <div className="relative aspect-[16/10] overflow-hidden rounded-t-md bg-[#0a0a0a] ring-1 ring-white/10">
-          <div className="absolute left-1/2 top-1 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white/20" />
-          <Screen src={src} alt={alt} />
+    <div className={`relative ${className}`}>
+      {/* Outer ambient glow */}
+      <div className="pointer-events-none absolute -inset-6 rounded-[2.5rem] bg-gradient-to-tr from-blue-600/20 via-indigo-600/10 to-cyan-400/10 blur-3xl" />
+
+      {/* Modern MacBook Pro style Chassis */}
+      <div className="relative rounded-t-2xl border border-white/15 bg-[#121826] p-2 sm:p-2.5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.06)]">
+        {/* Screen Bezel */}
+        <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-[#060911] shadow-inner">
+          <div className="absolute left-1/2 top-2 z-20 flex -translate-x-1/2 items-center gap-1.5">
+            <div className="h-1.5 w-1.5 rounded-full bg-white/20 ring-1 ring-white/10" />
+            <div className="h-[3px] w-12 rounded-full bg-white/10" />
+          </div>
+          <div className="absolute inset-0 ring-1 ring-inset ring-white/[0.08]" />
+          <Screen src={src} alt={alt} fit="object-cover" />
         </div>
       </div>
-      <div className="relative mx-[-2.5%] h-3 rounded-b-[1.2rem] bg-gradient-to-b from-[#2b3647] to-[#0e1520] sm:h-4">
-        <div className="absolute left-1/2 top-0 h-1.5 w-24 -translate-x-1/2 rounded-b-lg bg-black/50 sm:w-32" />
+
+      {/* Sleek Machined Aluminum Base / Keyboard Deck */}
+      <div className="relative mx-auto h-4 w-full rounded-b-2xl bg-gradient-to-b from-[#1a2234] via-[#101522] to-[#080b14] shadow-2xl sm:h-5">
+        <div className="absolute inset-x-[20%] top-0 h-[1px] bg-gradient-to-r from-transparent via-blue-400/30 to-transparent" />
+        <div className="absolute left-1/2 top-0 h-2 w-32 -translate-x-1/2 rounded-b-lg bg-black/60 sm:w-44" />
+        <div className="absolute bottom-1 left-1/2 h-[2px] w-3/4 -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
       </div>
     </div>
   )
@@ -151,11 +164,25 @@ function Laptop({ src, alt, className = "" }) {
 
 function Phone({ src, alt, className = "" }) {
   return (
-    <div
-      className={`rounded-[2.2rem] border border-white/20 bg-[#0b1220] p-[6px] shadow-[0_40px_70px_-25px_rgba(0,0,0,0.95)] ${className}`}
-    >
-      <div className="relative aspect-[9/19] overflow-hidden rounded-[1.75rem] bg-black">
-        <Screen src={src} alt={alt} />
+    <div className={`relative ${className}`}>
+      {/* Soft outer glow */}
+      <div className="pointer-events-none absolute -inset-4 rounded-[3rem] bg-gradient-to-b from-blue-500/20 via-cyan-500/10 to-transparent blur-2xl" />
+
+      {/* Frame */}
+      <div className="relative rounded-[2.5rem] border border-white/20 bg-[#161d2f] p-[6px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.08)]">
+        {/* Inner bezel */}
+        <div className="relative aspect-[9/19.5] overflow-hidden rounded-[2.2rem] bg-black shadow-inner">
+          {/* Dynamic Island */}
+          <div className="absolute left-1/2 top-3 z-20 h-[1.1rem] w-[26%] -translate-x-1/2 rounded-full bg-black shadow-[0_0_0_1.5px_rgba(255,255,255,0.12)]" />
+          {/* Side buttons */}
+          <div className="absolute -left-[7px] top-[18%] h-8 w-[3px] rounded-l-full bg-white/20" />
+          <div className="absolute -left-[7px] top-[28%] h-12 w-[3px] rounded-l-full bg-white/20" />
+          <div className="absolute -right-[7px] top-[24%] h-14 w-[3px] rounded-r-full bg-white/20" />
+
+          <Screen src={src} alt={alt} fit="object-cover" />
+          {/* Home Indicator */}
+          <div className="absolute bottom-2 left-1/2 h-1 w-1/3 -translate-x-1/2 rounded-full bg-white/30" />
+        </div>
       </div>
     </div>
   )
@@ -174,11 +201,11 @@ function MerchantTour() {
   }
 
   return (
-    <div className="mt-14 grid gap-10 lg:grid-cols-[0.8fr_1.4fr] lg:gap-14">
+    <div className="mt-16 grid gap-12 lg:grid-cols-[0.85fr_1.35fr] lg:gap-16 items-center">
       <div
         role="tablist"
         aria-label="Merchant workflow"
-        className="bb-scroll -mx-6 flex gap-2 overflow-x-auto px-6 lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:px-0"
+        className="bb-scroll -mx-6 flex gap-2.5 overflow-x-auto px-6 lg:mx-0 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:px-0"
       >
         {merchantSteps.map((s, i) => {
           const active = i === step
@@ -188,17 +215,23 @@ function MerchantTour() {
               role="tab"
               aria-selected={active}
               onClick={() => pick(i)}
-              className={`shrink-0 rounded-xl border px-4 py-3 text-left transition-colors lg:rounded-none lg:border-0 lg:border-l-2 lg:px-6 lg:py-5 ${
+              className={`group relative shrink-0 rounded-2xl border px-5 py-4 text-left transition-all duration-300 lg:rounded-xl lg:border-0 lg:border-l-[3px] lg:px-6 lg:py-5 ${
                 active
-                  ? "border-[#00baf2]/60 bg-[#00baf2]/10 lg:border-l-[#19d9a0] lg:bg-white/[0.04]"
-                  : "border-white/10 hover:bg-white/[0.03] lg:border-l-white/10"
+                  ? "border-blue-500/50 bg-blue-500/10 shadow-[0_0_30px_-8px_rgba(59,130,246,0.3)] lg:border-l-blue-500 lg:bg-white/[0.05]"
+                  : "border-white/10 hover:border-white/20 hover:bg-white/[0.03] lg:border-l-white/10"
               }`}
             >
-              <span className={`bb-display block text-base font-semibold sm:text-lg ${active ? "text-white" : "text-white/60"}`}>
+              <span
+                className={`bb-display block text-[15px] font-semibold tracking-tight sm:text-base ${
+                  active ? "text-white" : "text-white/60 group-hover:text-white/85"
+                }`}
+              >
                 {s.title}
               </span>
               {active && (
-                <span className="mt-2 hidden max-w-sm text-sm leading-6 text-[#9fb2c8] lg:block">{s.body}</span>
+                <span className="mt-2 hidden max-w-sm text-[13.5px] leading-6 text-white/55 lg:block">
+                  {s.body}
+                </span>
               )}
             </button>
           )
@@ -206,21 +239,21 @@ function MerchantTour() {
       </div>
 
       <div>
-        <Laptop src={currentShot.src} alt={currentShot.alt} className="mx-auto w-[94%]" />
+        <Laptop src={currentShot.src} alt={currentShot.alt} className="mx-auto w-full max-w-4xl" />
 
-        <p className="mt-6 text-sm leading-6 text-[#9fb2c8] lg:hidden">{current.body}</p>
+        <p className="mt-6 text-sm leading-6 text-white/60 lg:hidden">{current.body}</p>
 
         {current.shots.length > 1 && (
-          <div className="mt-6 flex justify-center gap-2" role="group" aria-label="Screens for this step">
+          <div className="mt-6 flex justify-center gap-2.5" role="group" aria-label="Screens for this step">
             {current.shots.map((s, i) => (
               <button
                 key={s.src}
                 onClick={() => setShot(i)}
                 aria-pressed={i === shot}
-                className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+                className={`rounded-full border px-5 py-1.5 text-sm font-medium transition-all duration-200 ${
                   i === shot
-                    ? "border-[#19d9a0] bg-[#19d9a0]/15 text-white"
-                    : "border-white/15 text-white/55 hover:text-white"
+                    ? "border-blue-500/60 bg-blue-500/15 text-blue-300 shadow-[0_0_20px_-6px_rgba(59,130,246,0.4)]"
+                    : "border-white/15 text-white/50 hover:border-white/25 hover:text-white/80"
                 }`}
               >
                 {s.label}
@@ -237,44 +270,45 @@ function MerchantTour() {
 export default function Landing() {
   return (
     <div
-      className="bb-body min-h-screen overflow-x-hidden text-[#cbd8e6]"
+      className="bb-body min-h-screen overflow-x-hidden text-white/80"
       style={{
         background:
-          "radial-gradient(60rem 36rem at 100% -5%, rgba(0,186,242,0.30), transparent 62%)," +
-          "radial-gradient(55rem 34rem at -8% 30%, rgba(25,217,160,0.18), transparent 62%)," +
-          "radial-gradient(50rem 30rem at 100% 62%, rgba(10,80,190,0.25), transparent 62%)," +
-          "#040a14",
+          "radial-gradient(70rem 40rem at 110% -10%, rgba(37,99,235,0.18), transparent 55%)," +
+          "radial-gradient(60rem 38rem at -15% 25%, rgba(14,116,144,0.12), transparent 55%)," +
+          "radial-gradient(55rem 32rem at 90% 70%, rgba(79,70,229,0.10), transparent 60%)," +
+          "#030712",
       }}
     >
       <style>{FONT_CSS}</style>
 
       <main>
         {/* ---------------- HERO ---------------- */}
-        <section className="mx-auto grid max-w-7xl items-center gap-14 px-6 pb-24 pt-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:pb-32 lg:pt-24">
+        <section className="mx-auto grid max-w-7xl items-center gap-16 px-6 pb-28 pt-16 lg:grid-cols-[1fr_1fr] lg:gap-12 lg:pb-36 lg:pt-28">
           <div>
-            <div className="bb-rise inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] py-1.5 pl-4 pr-1.5 text-sm text-white/70">
+            <div className="bb-rise inline-flex items-center gap-3 rounded-full border border-blue-500/20 bg-blue-500/10 py-1.5 pl-4 pr-2 text-sm text-blue-200 backdrop-blur-md">
               Bills collected through
-              <span className="flex items-center rounded-full bg-white px-3 py-1.5">
+              <span className="flex items-center rounded-full bg-white px-3 py-1 shadow-sm">
                 <PaytmLogo className="h-4" />
               </span>
             </div>
 
-            <h1 className="bb-display bb-rise bb-rise-2 mt-8 text-[2.7rem] font-semibold leading-[1.02] text-white sm:text-6xl xl:text-[4.4rem]">
+            <h1 className="bb-display bb-rise bb-rise-2 mt-8 text-[2.85rem] font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl xl:text-[4.2rem]">
               Bill your customers.
               <br />
-              Get paid the same day.
+              <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">
+                Get paid the same day.
+              </span>
             </h1>
 
-            <p className="bb-rise bb-rise-3 mt-7 max-w-md text-lg leading-8 text-[#9fb2c8]">
-              Bill-Bridge lets merchants create GST-ready bills, send them to customers, and collect through Paytm.
-              Every payment and refund stays on the bill it belongs to.
+            <p className="bb-rise bb-rise-3 mt-6 max-w-lg text-lg leading-relaxed text-white/60">
+              Bill-Bridge lets merchants create GST-ready bills, send them to customers, and collect through Paytm. Every payment and refund stays securely linked to the bill.
             </p>
 
             <div className="bb-rise bb-rise-3 mt-9 flex flex-col gap-3 sm:flex-row">
               <Button
                 asChild
                 size="lg"
-                className="h-12 rounded-full bg-[#19d9a0] px-7 text-base font-semibold text-[#03140e] hover:bg-[#4be8b8]"
+                className="h-13 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 px-8 text-base font-semibold text-white shadow-[0_8px_30px_-6px_rgba(37,99,235,0.5)] transition-all hover:brightness-110 hover:shadow-[0_12px_40px_-6px_rgba(37,99,235,0.7)]"
               >
                 <Link to="/signup">Create free account</Link>
               </Button>
@@ -282,36 +316,40 @@ export default function Landing() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-12 rounded-full border-white/25 bg-transparent px-7 text-base text-white hover:bg-white/10 hover:text-white"
+                className="h-13 rounded-xl border-white/15 bg-white/[0.04] px-8 text-base text-white/90 hover:border-white/30 hover:bg-white/[0.08] hover:text-white"
               >
                 <Link to="/login">Sign in</Link>
               </Button>
             </div>
           </div>
 
-          {/* composite: merchant laptop + customer phone */}
-          <div className="relative mx-auto w-full max-w-2xl pb-10 lg:max-w-none lg:pb-0 lg:pr-0">
-            <div
-              className="pointer-events-none absolute inset-x-6 top-10 h-4/5 rounded-[50%] blur-3xl"
-              style={{ background: "linear-gradient(120deg, rgba(0,186,242,0.35), rgba(25,217,160,0.25))" }}
-            />
-            <Laptop src={S("bill-create")} alt="Bill-Bridge merchant dashboard" className="relative w-[92%]" />
-            <Phone
-              src={S("m-received")}
-              alt="Bill-Bridge customer view"
-              className="absolute -bottom-2 right-0 w-[26%] min-w-[92px] max-w-[190px] sm:-bottom-6 lg:-right-4"
-            />
+          {/* CONSECUTIVE HERO SHOWCASE: Laptop & Mobile Side-by-Side / Stacked cleanly */}
+          <div className="relative mx-auto flex w-full max-w-xl flex-col items-center gap-6 lg:max-w-none lg:flex-row lg:items-center lg:justify-center">
+            <div className="pointer-events-none absolute inset-0 rounded-full bg-blue-600/15 blur-3xl" />
+            
+            {/* Laptop mockup */}
+            <div className="relative w-full max-w-[500px] lg:max-w-[560px]">
+              <Laptop src={S("bill-create")} alt="Bill-Bridge merchant dashboard" />
+            </div>
+
+            {/* Mobile mockup positioned consecutively/harmoniously */}
+            <div className="relative w-[55%] max-w-[220px] sm:max-w-[250px] lg:-ml-16 lg:mt-24 z-10">
+              <Phone src={S("m-received")} alt="Bill-Bridge customer view" />
+            </div>
           </div>
         </section>
 
         {/* ---------------- MERCHANT TOUR ---------------- */}
-        <section className="border-t border-white/10">
-          <div className="mx-auto max-w-7xl px-6 py-24 lg:py-32">
-            <h2 className="bb-display max-w-3xl text-4xl font-semibold leading-[1.05] text-white sm:text-5xl">
-              The merchant side, from sign-up to refund
+        <section className="border-t border-white/[0.08] bg-black/20">
+          <div className="mx-auto max-w-7xl px-6 py-28 lg:py-36">
+            <h2 className="bb-display max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl">
+              The merchant workflow,{" "}
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                from sign-up to refund
+              </span>
             </h2>
-            <p className="mt-5 max-w-xl leading-7 text-[#9fb2c8]">
-              Pick a step to see the real dashboard screen for it.
+            <p className="mt-4 max-w-xl text-[15px] leading-7 text-white/50">
+              Select any step to view the actual production dashboard screen.
             </p>
             <MerchantTour />
           </div>
@@ -319,30 +357,41 @@ export default function Landing() {
 
         {/* ---------------- CUSTOMER FLOW ---------------- */}
         <section
-          className="border-t border-white/10"
-          style={{ background: "linear-gradient(180deg, rgba(8,40,52,0.55), rgba(4,10,20,0) 75%)" }}
+          className="border-t border-white/[0.08]"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(15,23,42,0.45), rgba(3,7,18,0) 70%)",
+          }}
         >
-          <div className="mx-auto max-w-7xl px-6 py-24 lg:py-32">
-            <h2 className="bb-display max-w-3xl text-4xl font-semibold leading-[1.05] text-white sm:text-5xl">
-              Customers pay in three taps
+          <div className="mx-auto max-w-7xl px-6 py-28 lg:py-36">
+            <h2 className="bb-display max-w-3xl text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl">
+              Customers pay in{" "}
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                three simple taps
+              </span>
             </h2>
-            <p className="mt-5 max-w-xl leading-7 text-[#9fb2c8]">
-              Everything works in a phone browser, so there is no app for your customers to install.
+            <p className="mt-4 max-w-xl text-[15px] leading-7 text-white/50">
+              Works instantly in any mobile browser with zero app installation required.
             </p>
 
-            <ol className="mt-16 grid gap-16 md:grid-cols-3 md:gap-8">
+            <ol className="mt-20 grid gap-16 md:grid-cols-3 md:gap-8">
               {payFlow.map((p, i) => (
-                <li key={p.title} className={`flex flex-col items-center text-center ${i === 1 ? "md:mt-14" : ""}`}>
-                  <Phone src={p.src} alt={p.alt} className="w-[62%] max-w-[250px]" />
+                <li
+                  key={p.title}
+                  className={`flex flex-col items-center text-center ${i === 1 ? "md:mt-12" : ""}`}
+                >
+                  <Phone src={p.src} alt={p.alt} className="w-[70%] max-w-[240px]" />
                   <div className="mt-8 flex items-center gap-3">
-                    <span className="bb-display flex h-8 w-8 items-center justify-center rounded-full bg-[#19d9a0]/15 text-sm font-semibold text-[#19d9a0]">
+                    <span className="bb-display flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20 text-sm font-bold text-blue-400 ring-1 ring-blue-500/30">
                       {i + 1}
                     </span>
-                    <h3 className="bb-display text-xl font-semibold text-white">{p.title}</h3>
+                    <h3 className="bb-display text-xl font-semibold tracking-tight text-white">
+                      {p.title}
+                    </h3>
                   </div>
-                  <p className="mt-3 max-w-xs text-sm leading-6 text-[#9fb2c8]">{p.body}</p>
+                  <p className="mt-3 max-w-xs text-sm leading-6 text-white/50">{p.body}</p>
                   {p.paytm && (
-                    <span className="mt-4 inline-flex items-center rounded-full bg-white px-3.5 py-1.5">
+                    <span className="mt-5 inline-flex items-center rounded-full bg-white px-4 py-2 shadow-md">
                       <PaytmLogo className="h-4" />
                     </span>
                   )}
@@ -350,13 +399,17 @@ export default function Landing() {
               ))}
             </ol>
 
-            <div className="mt-24 border-t border-white/10 pt-14">
-              <h3 className="bb-display text-2xl font-semibold text-white">Also on mobile</h3>
-              <div className="mt-8 grid grid-cols-3 gap-4 sm:gap-10">
+            <div className="mt-28 border-t border-white/[0.08] pt-16">
+              <h3 className="bb-display text-2xl font-semibold tracking-tight text-white">
+                Also available on mobile
+              </h3>
+              <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-10">
                 {alsoMobile.map((m) => (
                   <figure key={m.title} className="flex flex-col items-center text-center">
-                    <Phone src={m.src} alt={m.alt} className="w-full max-w-[190px]" />
-                    <figcaption className="mt-5 text-xs leading-5 text-[#9fb2c8] sm:text-sm">{m.title}</figcaption>
+                    <Phone src={m.src} alt={m.alt} className="w-[70%] max-w-[220px]" />
+                    <figcaption className="mt-5 text-xs leading-5 text-white/50 sm:text-sm">
+                      {m.title}
+                    </figcaption>
                   </figure>
                 ))}
               </div>
@@ -367,30 +420,35 @@ export default function Landing() {
         {/* ---------------- CTA ---------------- */}
         <section className="mx-auto max-w-7xl px-6 py-24">
           <div
-            className="overflow-hidden rounded-[2rem] border border-white/15 px-8 py-16 sm:px-14 sm:py-20"
+            className="relative overflow-hidden rounded-[2.2rem] border border-blue-500/20 px-8 py-16 sm:px-16 sm:py-20"
             style={{
               background:
-                "radial-gradient(40rem 20rem at 100% 0%, rgba(0,186,242,0.32), transparent 65%)," +
-                "radial-gradient(40rem 22rem at 0% 100%, rgba(25,217,160,0.22), transparent 65%)," +
-                "#08111f",
+                "radial-gradient(45rem 24rem at 100% -10%, rgba(37,99,235,0.25), transparent 60%)," +
+                "radial-gradient(40rem 22rem at 0% 110%, rgba(14,116,144,0.18), transparent 55%)," +
+                "#0b101d",
             }}
           >
-            <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.03)_1px,transparent_0)] [background-size:24px_24px]" />
+
+            <div className="relative flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <div className="inline-flex rounded-full bg-white px-5 py-2.5">
+                <div className="inline-flex rounded-full bg-white px-5 py-2 shadow-lg">
                   <PaytmLogo className="h-6" />
                 </div>
-                <h2 className="bb-display mt-8 max-w-2xl text-4xl font-semibold leading-[1.05] text-white sm:text-5xl">
-                  Send your first bill today.
+                <h2 className="bb-display mt-8 max-w-2xl text-3xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl">
+                  Send your first bill{" "}
+                  <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    today.
+                  </span>
                 </h2>
-                <p className="mt-5 max-w-lg leading-7 text-[#a9bdd2]">
-                  Register your business, add your GSTIN, and your customers can pay through Paytm.
+                <p className="mt-4 max-w-lg text-[15px] leading-7 text-white/60">
+                  Register your business, add your GSTIN, and let your customers settle invoices instantly through Paytm.
                 </p>
               </div>
               <Button
                 asChild
                 size="lg"
-                className="h-14 shrink-0 rounded-full bg-white px-9 text-base font-semibold text-[#04120e] hover:bg-[#e6fff6]"
+                className="h-13 shrink-0 rounded-xl bg-white px-9 text-base font-semibold text-slate-950 shadow-xl transition-all hover:bg-blue-50 hover:shadow-[0_12px_40px_-8px_rgba(255,255,255,0.25)]"
               >
                 <Link to="/signup">Create free account</Link>
               </Button>
